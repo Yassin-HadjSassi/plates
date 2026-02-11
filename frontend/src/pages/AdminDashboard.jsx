@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
+import CameraFeed from '../components/CameraFeed';
+import PlateUpload from '../components/PlateUpload';
 
 function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('users');
@@ -20,13 +22,13 @@ function AdminDashboard() {
         // Background Dictionary Data
         fetchUsers();
         fetchCars();
-        if (activeTab === 'config') fetchConfig();
+        if (activeTab === 'config' || activeTab === 'live') fetchConfig();
         if (activeTab === 'logs') fetchLogs();
         if (activeTab === 'car-status') fetchCarStatus();
     }, [activeTab]);
 
     const fetchData = async () => {
-        if (['config', 'logs', 'car-status'].includes(activeTab)) return;
+        if (['config', 'logs', 'car-status', 'live'].includes(activeTab)) return;
         try {
             const response = await api.get(`/admin/${activeTab}`);
             setData(response.data);
@@ -111,12 +113,28 @@ function AdminDashboard() {
             <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <button className={`btn ${activeTab === 'users' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setActiveTab('users')}>Users</button>
                 <button className={`btn ${activeTab === 'cars' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setActiveTab('cars')}>Cars</button>
+                <button className={`btn ${activeTab === 'live' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setActiveTab('live')}>Live & AI</button>
                 <button className={`btn ${activeTab === 'car-status' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setActiveTab('car-status')}>Company Cars Status</button>
                 <button className={`btn ${activeTab === 'logs' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setActiveTab('logs')}>Tracking Activity</button>
                 <button className={`btn ${activeTab === 'config' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setActiveTab('config')}>System Config</button>
             </div>
 
             {/* Content Logic */}
+            {activeTab === 'live' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="card">
+                        <h3>Live Cameras</h3>
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            <CameraFeed url={config?.enterCameraUrl} label="Entrance Camera" direction="ENTER" />
+                            <CameraFeed url={config?.exitCameraUrl} label="Exit Camera" direction="EXIT" />
+                        </div>
+                    </div>
+                    <div>
+                        <PlateUpload />
+                    </div>
+                </div>
+            )}
+
             {activeTab === 'config' && (
                 <div className="card" style={{ maxWidth: '400px' }}>
                     <h2>System Configuration</h2>
@@ -130,6 +148,17 @@ function AdminDashboard() {
                                 <label>Auto Close Delay (seconds)</label>
                                 <input type="number" value={formData.autoCloseDelaySeconds ?? config.autoCloseDelaySeconds} onChange={e => setFormData({ ...formData, autoCloseDelaySeconds: e.target.value })} style={{ width: '100%', padding: '0.5rem' }} />
                             </div>
+
+                            <h4>Camera Settings</h4>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label>Enter Camera URL (e.g. 0 or rtsp://...)</label>
+                                <input type="text" value={formData.enterCameraUrl ?? config.enterCameraUrl ?? ""} onChange={e => setFormData({ ...formData, enterCameraUrl: e.target.value })} style={{ width: '100%', padding: '0.5rem' }} />
+                            </div>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label>Exit Camera URL</label>
+                                <input type="text" value={formData.exitCameraUrl ?? config.exitCameraUrl ?? ""} onChange={e => setFormData({ ...formData, exitCameraUrl: e.target.value })} style={{ width: '100%', padding: '0.5rem' }} />
+                            </div>
+
                             <button type="submit" className="btn btn-success">Save Config</button>
                         </form>
                     )}

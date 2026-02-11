@@ -13,6 +13,10 @@ public class SystemConfig {
 
     private long qrTimeoutSeconds = 20;
     private long autoCloseDelaySeconds = 10;
+    
+    // Camera Configuration
+    private String enterCameraUrl = "0"; // Default webcam
+    private String exitCameraUrl = "";
 
     public SystemConfig() {}
 
@@ -24,4 +28,10 @@ public class SystemConfig {
 
     public long getAutoCloseDelaySeconds() { return autoCloseDelaySeconds; }
     public void setAutoCloseDelaySeconds(long autoCloseDelaySeconds) { this.autoCloseDelaySeconds = autoCloseDelaySeconds; }
+
+    public String getEnterCameraUrl() { return enterCameraUrl; }
+    public void setEnterCameraUrl(String enterCameraUrl) { this.enterCameraUrl = enterCameraUrl; }
+
+    public String getExitCameraUrl() { return exitCameraUrl; }
+    public void setExitCameraUrl(String exitCameraUrl) { this.exitCameraUrl = exitCameraUrl; }
 }

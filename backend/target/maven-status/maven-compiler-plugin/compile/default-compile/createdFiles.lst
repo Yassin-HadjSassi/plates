@@ -1,6 +1,7 @@
 com\example\accesscontrol\domain\PlateType.class
 com\example\accesscontrol\infrastructure\TrackingLogRepository.class
 com\example\accesscontrol\infrastructure\UserRepository.class
+com\example\accesscontrol\application\PlateDetectionService$PendingDetection.class
 com\example\accesscontrol\domain\RequestStatus.class
 com\example\accesscontrol\application\TrackingService$CarStatusDTO.class
 com\example\accesscontrol\infrastructure\CarRepository.class

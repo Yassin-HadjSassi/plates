@@ -18,7 +18,7 @@ public class InputController {
 
     @PostMapping("/camera")
     public void receiveCameraInput(@RequestBody CamInputDTO input) {
-        plateDetectionService.handleCameraInput(input.getPlateNumber());
+        plateDetectionService.handleCameraInput(input.getPlateNumber(), input.getDirection());
     }
 
     @PostMapping("/qr")

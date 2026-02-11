@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
+import CameraFeed from '../components/CameraFeed';
 
 function GuardDashboard() {
     const [pendingPlates, setPendingPlates] = useState({});
     const [barrierStatus, setBarrierStatus] = useState(false);
     const [logs, setLogs] = useState([]);
     const [carStatus, setCarStatus] = useState([]);
+    const [config, setConfig] = useState(null);
 
     const fetchPending = async () => { try { const res = await api.get('/guard/pending'); setPendingPlates(res.data); } catch (e) { } };
     const fetchBarrier = async () => { try { const res = await api.get('/guard/barrier'); setBarrierStatus(res.data); } catch (e) { } };
     const fetchLogs = async () => { try { const res = await api.get('/guard/logs'); setLogs(res.data); } catch (e) { } };
     const fetchCarStatus = async () => { try { const res = await api.get('/guard/car-status'); setCarStatus(res.data); } catch (e) { } };
+    const fetchConfig = async () => { try { const res = await api.get('/admin/config'); setConfig(res.data); } catch (e) { } };
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -19,6 +22,7 @@ function GuardDashboard() {
             fetchLogs();
             fetchCarStatus();
         }, 1000);
+        fetchConfig();
         return () => clearInterval(interval);
     }, []);
 
@@ -41,24 +45,34 @@ function GuardDashboard() {
                 </div>
             </div>
 
-            <div style={{ marginBottom: '2rem' }}>
-                <h2>Pending Detection</h2>
-                {Object.keys(pendingPlates).length === 0 ? <p>No plates detected.</p> : (
-                    <div style={{ display: 'grid', gap: '1rem' }}>
-                        {Object.entries(pendingPlates).map(([plate, time]) => (
-                            <div key={plate} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div>
-                                    <h3 style={{ margin: '0' }}>{plate}</h3>
-                                    <p style={{ margin: 0, color: '#666' }}>Detected: {new Date(time).toLocaleTimeString()}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <CameraFeed url={config?.enterCameraUrl} label="Entrance" direction="ENTER" onDetection={(plate, dir) => console.log("Guard View Detected:", plate, dir)} />
+                    <CameraFeed url={config?.exitCameraUrl} label="Exit" direction="EXIT" />
+                </div>
+
+                <div>
+                    <h2>Pending Detection</h2>
+                    {Object.keys(pendingPlates).length === 0 ? <p>No plates detected.</p> : (
+                        <div style={{ display: 'grid', gap: '1rem', maxHeight: '400px', overflowY: 'auto' }}>
+                            {Object.entries(pendingPlates).map(([plate, details]) => (
+                                <div key={plate} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <h3 style={{ margin: '0' }}>{plate}</h3>
+                                        <span className="badge bg-primary">{details.direction || "ENTER"}</span>
+                                    </div>
+                                    <p style={{ margin: 0, color: '#666', fontSize: '0.9em' }}>
+                                        Detected: {new Date(details.timestamp).toLocaleTimeString()}
+                                    </p>
+                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                        <button className="btn btn-success" style={{ flex: 1 }} onClick={() => handleOpen(plate)}>Open</button>
+                                        <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => handleReject(plate)}>Reject</button>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button className="btn btn-success" onClick={() => handleOpen(plate)}>Acknowledge (Open)</button>
-                                    <button className="btn btn-danger" onClick={() => handleReject(plate)}>Reject</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>

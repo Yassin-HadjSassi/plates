@@ -30,8 +30,8 @@ public class GuardController {
     }
 
     @GetMapping("/pending")
-    public Map<String, Instant> getPendingPlates() {
-        return plateDetectionService.getPendingPlates();
+    public Map<String, PlateDetectionService.PendingDetection> getPendingPlates() {
+        return plateDetectionService.getPendingPlatesWithDetails();
     }
 
     @PostMapping("/open")
